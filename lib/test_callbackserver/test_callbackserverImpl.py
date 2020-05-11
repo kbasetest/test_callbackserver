@@ -2,6 +2,7 @@
 #BEGIN_HEADER
 import logging
 import os
+import requests
 
 from installed_clients.KBaseReportClient import KBaseReport
 #END_HEADER
@@ -24,7 +25,7 @@ class test_callbackserver:
     ######################################### noqa
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/test_callbackserver"
-    GIT_COMMIT_HASH = "749d89d49bc375c524d6303ad9b18c72e13e7bdc"
+    GIT_COMMIT_HASH = "ddaa5d3e2fb4c79d155d6ff52ba791309a772309"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -44,15 +45,18 @@ class test_callbackserver:
     def test_callbackserver(self, ctx, params):
         """
         Send an arbitrary JSONRPC mapping to the Callback Service.
-        An example mapping that tells the CBS to run the Construct Species tree method:
+        An example mapping that tells the CBS to run the beta version of the Construct Species tree
+        method:
                 {'method': 'SpeciesTreeBuilder.construct_species_tree',
+                 'id': '1671',  # arbitrary number
+                 'version': '1.1,
                  'params': [{
-                 'new_genomes': ['50118/3/2', '50118/2/2'],
+                     'new_genomes': ['50118/3/2', '50118/2/2'],
                      'out_workspace': 'gaprice:narrative_1588989318474',
                      'out_tree_id': 'njs_tree',
                      'out_genomeset_ref': 'gaprice:narrative_1588989318474/nts_tree_set',
                      'copy_genomes': 0}],
-                 'service_ver': 'dev'
+                 'context': {'service_ver': 'beta'}
                  }
         :param params: instance of mapping from String to unspecified object
         :returns: instance of unspecified object
@@ -60,6 +64,9 @@ class test_callbackserver:
         # ctx is the context object
         # return variables are: output
         #BEGIN test_callbackserver
+        headers = {'authorization': ctx['token']}
+        req = requests.post(self.callback_url, headers=headers, json=params)
+        output = req.json()
         #END test_callbackserver
 
         # At some point might do deeper type checking...
